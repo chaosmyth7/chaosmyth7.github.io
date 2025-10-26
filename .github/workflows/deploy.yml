@@ -47,9 +47,7 @@ jobs:
       - name: Build Nuxt app
         run: |
           echo "Using baseURL: $BASE_URL"
-          echo "export default { app: { baseURL: '$BASE_URL' } }" > baseurl.config.mjs
           npx nuxt build
-          npx nuxt prerender
 
       # 🔹 Deploy ke GitHub Pages
       - name: Deploy to GitHub Pages
