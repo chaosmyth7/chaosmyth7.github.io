@@ -1,0 +1,59 @@
+name: Deploy Nuxt 4 to GitHub Pages (Smart Version)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 🔹 Deteksi nama repo & user
+      - name: Detect repository type
+        id: detect
+        run: |
+          REPO_NAME=$(echo "${GITHUB_REPOSITORY}" | cut -d'/' -f2)
+          USER_NAME=$(echo "${GITHUB_REPOSITORY}" | cut -d'/' -f1)
+
+          echo "Repo: $REPO_NAME"
+          echo "User: $USER_NAME"
+
+          # Jika repo = username.github.io → baseURL = /
+          # Jika bukan → baseURL = /nama-repo/
+          if [ "$REPO_NAME" = "$USER_NAME.github.io" ]; then
+            echo "BASE_URL=/" >> $GITHUB_ENV
+          else
+            echo "BASE_URL=/$REPO_NAME/" >> $GITHUB_ENV
+          fi
+
+      # 🔹 Build Nuxt (dengan baseURL dinamis)
+      - name: Build Nuxt app
+        run: |
+          echo "Using baseURL: $BASE_URL"
+          echo "export default { app: { baseURL: '$BASE_URL' } }" > baseurl.config.mjs
+          npx nuxt build
+          npx nuxt prerender
+
+      # 🔹 Deploy ke GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .output/public
