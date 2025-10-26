@@ -1,18 +1,5 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  ssr: true,
-
-  app: {
-    baseURL: "/", // ✅ karena ini user site, bukan project site
-  },
-
-  nitro: {
-    preset: "github-pages",
-    prerender: {
-      routes: ["/"],
-      crawlLinks: true,
-    },
-  },
-
   modules: [
     "@nuxt/eslint",
     "@nuxt/image",
@@ -27,8 +14,22 @@ export default defineNuxtConfig({
 
   compatibilityDate: "2024-11-01",
 
-  devtools: {
-    enabled: true,
+  // ✅ Optimasi untuk GitHub Pages
+  app: {
+    baseURL: "/", // ubah ke "/<repo-name>/" kalau repo bukan username.github.io
+    buildAssetsDir: "_nuxt/", // folder asset default
+  },
+
+  nitro: {
+    preset: "github_pages", // ✅ gunakan preset bawaan
+    prerender: {
+      routes: ["/"], // halaman utama
+      crawlLinks: true, // cari & render semua link internal
+    },
+  },
+
+  image: {
+    format: ["webp", "avif"], // 🔥 format gambar modern
   },
 
   eslint: {
